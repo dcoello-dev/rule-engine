@@ -34,6 +34,14 @@ public:
     {
     }
 
+    void set_pos(
+            uint32_t x,
+            uint32_t y) noexcept
+    {
+        X_ = x;
+        Y_ = y;
+    }
+
     static Position position_from_tag(
             const std::string& tag) noexcept
     {
@@ -47,13 +55,24 @@ public:
         return Position{"invalid"};
     }
 
-    bool get_position_tm(
-            PlTermv& tm )  noexcept
+    PlTermv get_position_tm()  noexcept
     {
-        bool ret = true;
-        ret &= tm[0].unify_string(tag_.c_str());
-        ret &= tm[1].unify_integer(X_);
-        ret &= tm[2].unify_integer(Y_);
+        PlTermv tm(3);
+        (void)tm[0].unify_string(tag_.c_str());
+        (void)tm[1].unify_integer(X_);
+        (void)tm[2].unify_integer(Y_);
+        return tm;
+    }
+
+    bool sync_with_knowledge_base() noexcept
+    {
+        bool ret = false;
+        PlTermv pos = get_position_tm();
+        PlQuery q("add_POI", pos);
+        while ( q.next_solution())
+        {
+            ret = true;
+        }
         return ret;
     }
 
